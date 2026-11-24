@@ -34,19 +34,17 @@ permalink: /
 <div class="code-example" markdown="1">
 
 ### 📐 项目与架构
-了解项目目标、系统数据流、单位定义与施力关系
-
-[进入章节]({% link docs/architecture/architecture.md %}){: .btn .btn-outline }
+- [项目总览]({% link docs/architecture/overview.md %}) - 项目分类、数据流、推进力单位与施力关系
+- [阶段路线与进度]({% link docs/architecture/roadmap.md %}) - 开发阶段、验收要点、历史验证证据
 
 ### ⚙️ 运行与验收
-环境配置、操作步骤、验证结果
-
-[进入章节]({% link docs/operations/operations.md %}){: .btn .btn-outline }
+- [环境与工程锁定]({% link docs/operations/environment.md %}) - Unity 6000.5.11f1、ROS2 Jazzy、锁定SHA
+- [可复现操作]({% link docs/operations/procedures.md %}) - 启动适配器、WASD控制
+- [已有验证结果]({% link docs/operations/verification.md %}) - 历史验证记录、单位换算、施力公式
 
 ### ⚠️ 问题与记录
-已知问题、待验证项
-
-[进入章节]({% link docs/issues/issues.md %}){: .btn .btn-outline }
+- [已知问题清单]({% link docs/issues/known-issues.md %}) - 渲染异常、GPS待验证、响应未验收
+- [源码与状态限定]({% link docs/issues/code-status.md %}) - HEAD差异、未保存场景、许可证边界
 
 </div>
 
