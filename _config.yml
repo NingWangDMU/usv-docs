@@ -1,0 +1,85 @@
+# Unity无人艇工程文档 — Just the Docs (native theme)
+# Theme: just-the-docs 0.12.0 (MIT). Do not replace this with a hand-built skin.
+
+title: Unity无人艇工程文档
+description: 以 Unity3D 为核心的无人艇工程文档。MARUS 2.0 是当前复用基线，不是最终目标。
+theme: just-the-docs
+color_scheme: light
+
+# GitHub Pages deployment
+url: "https://ningwangdmu.github.io"
+baseurl: "/usv-docs"
+permalink: pretty
+
+defaults:
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "default"
+
+# Official theme features
+search_enabled: true
+search:
+  heading_level: 2
+  previews: 3
+  preview_words_before: 5
+  preview_words_after: 10
+  rel_url: true
+  button: false
+  focus_shortcut_key: "k"
+
+nav_enabled: true
+heading_anchors: true
+enable_copy_code_button: true
+back_to_top: true
+back_to_top_text: "返回顶部"
+
+# Keep the header uncluttered: no aux links, no "Edit on GitHub", no analytics.
+# Do not enable mermaid here: the theme default loads it from a CDN.
+
+callouts:
+  note:
+    title: 说明
+    color: purple
+  warning:
+    title: 注意
+    color: yellow
+  important:
+    title: 重要
+    color: blue
+
+footer_content: "工程结论为历史记录，不是打开本页时的实时复查。主题为 Just the Docs（MIT）。"
+
+# Do not invent last-edited timestamps.
+last_edit_timestamp: false
+gh_edit_link: false
+
+exclude:
+  - vendor/
+  - .bundle/
+  - .sass-cache/
+  - .jekyll-cache/
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - NOTICE
+  - LICENSE-just-the-docs.txt
+  - scripts/
+  - offline-preview/
+  - SECURITY-REVIEW.md
+  - test-evidence/
+  - test-search.js
+  - node_modules/
+  - package.json
+  - package-lock.json
+  - .github/
+
+kramdown:
+  syntax_highlighter_opts:
+    block:
+      line_numbers: false
+
+sass:
+  quiet_deps: true
+  silence_deprecations: ["import"]

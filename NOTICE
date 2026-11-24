@@ -1,0 +1,27 @@
+Third-party notices — Unity无人艇工程文档（Just the Docs edition）
+
+This documentation site uses the Just the Docs Jekyll theme as its native
+theme (not a hand-drawn imitation of GitHub.com or a custom “skin”).
+
+1) just-the-docs 0.12.0
+   License: MIT
+   Copyright (c) 2016 Patrick Marsceill
+   Upstream: https://github.com/just-the-docs/just-the-docs
+   Reference site: https://just-the-docs.github.io/just-the-docs/
+   Official license copy: LICENSE-just-the-docs.txt
+   Pinned in this repository’s Gemfile to match the official template:
+   https://github.com/just-the-docs/just-the-docs-template
+
+   When this site is built, Jekyll compiles the theme’s SCSS and copies
+   the theme’s JavaScript (including the lunr.js search library bundled
+   by Just the Docs) into the generated preview. Those generated files
+   remain subject to the theme license. The upstream lunr.js project is
+   also MIT licensed; see the copy shipped inside the just-the-docs gem.
+
+2) Content and small official hooks in this package
+   The Markdown pages, _config.yml, _sass/custom/custom.scss (formula and
+   diagram overflow only), and includes are maintained for this project.
+   They do not replace the theme’s sidebar, typography, or link colors.
+
+This package is a local site. It does not create a GitHub repository and
+does not deploy to GitHub Pages. Hosting remains a later decision.
