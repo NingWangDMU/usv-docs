@@ -51,9 +51,14 @@ callouts:
 
 footer_content: "工程结论为历史记录，不是打开本页时的实时复查。主题为 Just the Docs（MIT）。"
 
-# Do not invent last-edited timestamps.
+# GitHub repository links
+gh_edit_link: true
+gh_edit_link_text: "在GitHub上编辑此页"
+gh_edit_repository: "https://github.com/NingWangDMU/usv-docs"
+gh_edit_branch: "main"
+gh_edit_view_mode: "edit"
+
 last_edit_timestamp: false
-gh_edit_link: false
 
 exclude:
   - vendor/
