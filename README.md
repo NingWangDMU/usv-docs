@@ -1,4 +1,4 @@
-# Unity无人艇工程文档
+# Unity无人艇工程
 
 基于 [Just the Docs](https://just-the-docs.github.io/just-the-docs/) 主题的无人艇工程技术文档站点。
 

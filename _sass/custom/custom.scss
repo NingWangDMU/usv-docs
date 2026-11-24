@@ -61,3 +61,28 @@
 .review-flag {
   font-size: 0.85em;
 }
+
+// Site title optimization - ensure "Unity无人艇工程" displays completely
+.site-title {
+  white-space: nowrap;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+.site-header {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+@media (max-width: 50rem) {
+  .site-title {
+    font-size: 1.125rem;
+    white-space: nowrap;
+    max-width: calc(100vw - 3.5rem);
+  }
+  
+  .site-header {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+}
