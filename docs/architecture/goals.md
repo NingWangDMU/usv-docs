@@ -38,6 +38,14 @@ nav_exclude: true
 <script>
 (function() {
   var hash = window.location.hash.substring(1);
+  if (hash) {
+    try {
+      hash = decodeURIComponent(hash);
+    } catch (e) {
+      // 解码失败，使用原始值
+    }
+  }
+  
   var hashMap = {
     '项目分类': '{{ "/docs/architecture/overview#项目分类" | relative_url }}',
     '开发阶段': '{{ "/docs/architecture/roadmap#开发阶段" | relative_url }}',
