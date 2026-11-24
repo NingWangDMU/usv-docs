@@ -75,6 +75,7 @@ exclude:
   - SECURITY-REVIEW.md
   - test-evidence/
   - test-search.js
+  - test-hash-redirect.js
   - node_modules/
   - package.json
   - package-lock.json
