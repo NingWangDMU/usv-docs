@@ -1,69 +1,68 @@
-// SVG diagram display optimization
-.diagram,
+// Official Just the Docs customization hook (_sass/custom/custom.scss).
+// Do not change theme link / sidebar / brand colors here.
+
+.diagram {
+  overflow: visible;
+  margin: 1rem 0;
+}
+
 .diagram svg {
   display: block;
+  width: 100%;
   max-width: 100%;
   height: auto;
-  margin: 1rem auto;
 }
 
-// Legend styles for data flow diagram
 .legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 1rem;
+  margin: 0 0 0.75rem;
+  padding: 0;
   list-style: none;
-  padding-left: 0;
-  font-size: 0.875rem;
-  margin-bottom: 1rem;
-}
-
-.legend li {
-  display: inline-block;
-  margin-right: 1rem;
-  margin-bottom: 0.25rem;
 }
 
 .legend i {
-  font-style: normal;
-  font-weight: 600;
+  display: inline-block;
+  width: 0.75rem;
+  height: 0.75rem;
+  margin-right: 0.35rem;
+  border: 1px solid #eeebee;
+  border-radius: 2px;
+  vertical-align: -0.1rem;
 }
 
-.sw-ros { color: #2e7d32; }
-.sw-adp { color: #1565c0; }
-.sw-unity { color: #e65100; }
-.sw-key { color: #6a1b9a; }
+.sw-ros { background: #ebf3ff; }
+.sw-adp { background: #fff9c8; }
+.sw-unity { background: #f5f6fa; }
+.sw-key { background: #f5f6fa; border-style: dashed; }
 
-// MathML formula fallback - only show HTML when MathML not supported
-.formula math {
-  display: inline;
-}
-
-.formula .fallback-html {
-  display: none;
-}
-
-@supports not (math-style: compact) {
-  .formula math {
-    display: none;
-  }
-  .formula .fallback-html {
-    display: inline;
-    font-style: italic;
-  }
-}
-
-// Review flags for security/accuracy notices
-.review-flag {
-  background-color: #fff3cd;
-  border-left: 4px solid #ffc107;
-  padding: 0.5rem 1rem;
+/* Formula: show HTML only when MathML is unsupported; never both. */
+.formula {
   margin: 1rem 0;
-  font-size: 0.875rem;
+  text-align: center;
+  overflow-x: auto;
+}
+.formula > math { display: none; }
+.formula-html { margin: 0; font-size: 1.25em; }
+.formula-html sub { font-size: 0.75em; }
+.formula-note {
+  margin: 0.5rem 0 0;
+  text-align: left;
+}
+@supports (math-style: normal) {
+  .formula > math[display="block"] {
+    display: block math;
+    font-size: 1.35em;
+  }
+  .formula-html { display: none !important; }
 }
 
-.review-flag::before {
-  content: "⚠️ ";
+.review-flag {
+  font-size: 0.85em;
 }
 
-// Site title display optimization - ensure "Unity无人艇工程" displays completely
+// Site title optimization - ensure "Unity无人艇工程" displays completely
 .site-title {
   white-space: nowrap;
   overflow: visible;
@@ -75,12 +74,11 @@
   padding-bottom: 0.75rem;
 }
 
-// Mobile header: ensure complete display without ellipsis
 @media (max-width: 50rem) {
   .site-title {
-    font-size: 1.125rem;  // Slightly reduced but still readable
+    font-size: 1.125rem;
     white-space: nowrap;
-    max-width: calc(100vw - 3.5rem);  // Space for menu button
+    max-width: calc(100vw - 3.5rem);
   }
   
   .site-header {
