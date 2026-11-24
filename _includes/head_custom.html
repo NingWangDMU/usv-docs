@@ -1,4 +1,4 @@
-{% comment %} Official Just the Docs hook. Load CJK lunr fixes after lunr.min.js. {% endcomment %}
-{% if site.search_enabled != false %}
-<script src="{{ '/assets/js/cjk-lunr.js' | relative_url }}"></script>
-{% endif %}
+{% comment %}
+  cjk-lunr.js is now loaded in head.html (between lunr.min.js and just-the-docs.js).
+  This file is reserved for future custom head elements.
+{% endcomment %}
