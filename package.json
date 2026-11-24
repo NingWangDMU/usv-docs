@@ -1,0 +1,15 @@
+{
+  "name": "usv-docs-tests",
+  "version": "1.0.0",
+  "description": "Search functionality tests for usv-docs",
+  "private": true,
+  "scripts": {
+    "test": "node test-search.js"
+  },
+  "dependencies": {
+    "lunr": "^2.3.9"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
