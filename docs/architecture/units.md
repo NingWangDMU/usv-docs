@@ -2,7 +2,6 @@
 title: 单位与施力关系（已迁移）
 parent: 项目与架构
 nav_exclude: true
-redirect_to: /usv-docs/docs/architecture/overview#推进力单位与施力关系
 ---
 
 # 页面已迁移
@@ -34,9 +33,23 @@ redirect_to: /usv-docs/docs/architecture/overview#推进力单位与施力关系
 <script>
 (function() {
   var hash = window.location.hash.substring(1);
+  if (hash) {
+    try {
+      hash = decodeURIComponent(hash);
+    } catch (e) {
+      // 解码失败，使用原始值
+    }
+  }
+  
   if (hash === '历史记录中的一个输入点') {
     window.location.href = '{{ "/docs/operations/verification#历史验证数值" | relative_url }}';
+  } else if (hash === '说明' || hash === '定义') {
+    window.location.href = '{{ "/docs/architecture/overview#推进力单位与施力关系" | relative_url }}';
+  } else if (hash) {
+    // 未知hash，安全fallback到overview
+    window.location.href = '{{ "/docs/architecture/overview#推进力单位与施力关系" | relative_url }}';
   } else {
+    // 无hash，默认到overview
     window.location.href = '{{ "/docs/architecture/overview#推进力单位与施力关系" | relative_url }}';
   }
 })();
