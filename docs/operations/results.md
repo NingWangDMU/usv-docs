@@ -1,53 +1,39 @@
 ---
-title: 验证结果
+title: 验证结果（已迁移）
 parent: 运行与验收
-nav_order: 3
+nav_exclude: true
+redirect_to: /usv-docs/docs/operations/verification
 ---
 
-# 验证结果
-{: .no_toc }
+# 页面已迁移
 
-## 目录
-{: .no_toc .text-delta }
+此页面内容已完整迁移到 [已有验证结果]({% link docs/operations/verification.md %})。
 
-1. TOC
-{:toc}
+{: .important }
+本页内容已迁移：
+- **已有验证记录** → [已有验证结果 §已有验证记录]({% link docs/operations/verification.md %}#已有验证记录)
+- **已知现象** → [已有验证结果 §已知现象]({% link docs/operations/verification.md %}#已知现象)
+- **验证边界说明** → [已有验证结果 §验证边界说明]({% link docs/operations/verification.md %}#验证边界说明)
 
----
+## 锚点映射
 
-## 已有验证记录
+| 旧锚点 | 新位置 |
+|:-------|:-------|
+| `#已有验证记录` | [已有验证结果 §已有验证记录]({% link docs/operations/verification.md %}#已有验证记录) |
+| `#已知现象` | [已有验证结果 §已知现象]({% link docs/operations/verification.md %}#已知现象) |
+| `#验证边界说明` | [已有验证结果 §验证边界说明]({% link docs/operations/verification.md %}#验证边界说明) |
 
-| 项目 | 证据摘要 | 边界 | 状态 |
-| --- | --- | --- | --- |
-| 连接 | 首次 Ping 成功；话题 `/marus_boat/gps` 收到完整 `NavSatFix` | 仅通道与消息可达 | 已验证 |
-| 推进求值与施力 | 输入示例 → 曲线输出 → 换算后的力；同实例 `FixedUpdate` 的 `AddForceAtPosition` 记录到后显式归零 | 只验证调用链，不是动力学 | 调用链已验证 |
-| 本地键盘 | `ASVPrimitiveController` 直接改 `Transform`，WASD 有效 | 非物理路径；需焦点与 `activeAgent` | 已验证 |
-| 艇体速度 / 位移 | 尚未记录到与施力对应的速度或位移 | 待批准的下一工作包 | 待验证 |
-| GPS 精度 / 频率 / 坐标 | 尚无验收结果 | 不得把收到消息写成定位正确 | 待验证 |
+正在自动跳转到 [已有验证结果]({% link docs/operations/verification.md %})…
 
-{: .note }
-施力单位关系、教学换算与历史数字的对照见 [单位与施力关系]({% link docs/architecture/units.md %})。那里的公式是标准 kgf→N 定义；具体数值来自历史记录。
+<meta http-equiv="refresh" content="0; url={{ '/docs/operations/verification' | relative_url }}">
 
----
+<script>
+  window.location.href = "{{ '/docs/operations/verification' | relative_url }}";
+</script>
 
-## 已知现象
-
-### 渲染相关
-
-| 现象 | 影响 | 状态 |
-|:-----|:-----|:-----|
-| 播放时地形粉色块 | 视觉，待查 | 记录中 |
-| Vulkan 报缺少水面高度缓冲 | 控制台警告 | 记录中 |
-| `RNG_CS.compute` 缺少 `#pragma kernel` | 编译警告 | 记录中 |
-
-详见 [已知问题清单]({% link docs/issues/known-issues.md %})。
-
-{: .warning }
-现象影响待查，**未归因于显卡驱动**。
+[点击这里手动跳转到已有验证结果]({% link docs/operations/verification.md %})
 
 ---
 
-## 验证边界说明
-
-以上为历史验证基线。备份路径只以文字给出，不做可点击的日志链接。制作本页时未直接读取该备份目录。
-
+{: .metadata }
+**兼容页**: 文档整理日期 2026-11-24 · 文档架构迁移 1.0 · 状态: 旧URL兼容跳转页

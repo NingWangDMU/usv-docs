@@ -1,52 +1,48 @@
 ---
-title: 单位与施力关系
+title: 单位与施力关系（已迁移）
 parent: 项目与架构
-nav_order: 3
+nav_exclude: true
+redirect_to: /usv-docs/docs/architecture/overview#推进力单位与施力关系
 ---
 
-# 单位与施力关系
-{: .no_toc }
+# 页面已迁移
 
-## 目录
-{: .no_toc .text-delta }
+此页面内容已迁移到 [已有验证结果]({% link docs/operations/verification.md %})。
 
-1. TOC
-{:toc}
+{: .important }
+本页内容已迁移：
+- **说明** → [项目总览 §推进力单位与施力关系]({% link docs/architecture/overview.md %}#推进力单位与施力关系)
+- **定义（教学说明、单位换算）** → [项目总览 §推进力单位与施力关系]({% link docs/architecture/overview.md %}#推进力单位与施力关系)
+- **历史验证数值（0.12输入点）** → [已有验证结果 §历史验证数值]({% link docs/operations/verification.md %}#历史验证数值)
+
+## 锚点映射
+
+| 旧锚点 | 新位置 |
+|:-------|:-------|
+| `#说明` | [项目总览 §推进力单位与施力关系]({% link docs/architecture/overview.md %}#推进力单位与施力关系) |
+| `#定义` | [项目总览 §推进力单位与施力关系]({% link docs/architecture/overview.md %}#推进力单位与施力关系) |
+| `#历史记录中的一个输入点` | [已有验证结果 §历史验证数值]({% link docs/operations/verification.md %}#历史验证数值) |
+
+<noscript>
+<p><strong>请选择目标页面：</strong></p>
+<ul>
+  <li><a href="{% link docs/architecture/overview.md %}#推进力单位与施力关系">项目总览 - 推进力单位与施力关系</a>（说明、定义）</li>
+  <li><a href="{% link docs/operations/verification.md %}#历史验证数值">已有验证结果 - 历史验证数值</a></li>
+</ul>
+</noscript>
+
+<script>
+(function() {
+  var hash = window.location.hash.substring(1);
+  if (hash === '历史记录中的一个输入点') {
+    window.location.href = '{{ "/docs/operations/verification#历史验证数值" | relative_url }}';
+  } else {
+    window.location.href = '{{ "/docs/architecture/overview#推进力单位与施力关系" | relative_url }}';
+  }
+})();
+</script>
 
 ---
 
-## 说明
-
-下面先给出**教学用的单位定义**，再核对应**一条历史记录**。两者不要混成"这次又做了一次新实验"。本页也不补充未经依据的控制律或完整推力曲线。
-
----
-
-## 定义（教学说明，不是实测推导）
-
-{% include formula.html %}
-
----
-
-## 历史记录中的一个输入点
-
-来源：用户回传的调试输出（转述）。制作本页时未直接读取原始备份文件。
-
-| 符号 | 含义 | 记录值 | 来源性质 |
-| --- | --- | --- | --- |
-| *u* | 推进指令输入 | `0.12` | 历史调试记录 |
-| *C*(*u*)，即 `curveOut` | 曲线输出 | `0.200008854` kgf | 历史调试记录 |
-| *F*<sub>N</sub>，即 `forceN` | 换算后的力 | `1.96141684` N | 历史调试记录 |
-
-用上面的定义做一致性核对（这是算术说明，不是新的测量）：
-
-```
-9.80665 × 0.200008854 = 1.961416828…  ≈  1.96141684 N
-```
-
-与记录给出的 `1.96141684` N 在该记录位数上一致。同一条记录还写明：该力在同实例 `FixedUpdate` 的 `AddForceAtPosition` 调用位置被记录到，随后显式归零生效。
-
-{: .warning-title }
-> 精度与动力学界限
->
-> 这些小数来自调试输出，不能当成已经过仪器标定的有效数字。本记录只证明「输入 → 求值 → 施力调用 → 归零」，**不能写成动力学已验证**。艇体速度与位移响应仍待验收；完整 *C*(*u*) 曲线也未给出。
-
+{: .metadata }
+**兼容页**: 文档整理日期 2026-11-24 · 文档架构迁移 1.0 · 状态: 旧URL兼容跳转页

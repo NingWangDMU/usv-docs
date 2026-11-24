@@ -155,6 +155,43 @@ if (!queryTestsPassed) {
   });
 }
 
+console.log('\n=== 锚点链接验证 ===');
+const anchorTests = [
+  { file: '_site/docs/architecture/overview/index.html', anchors: ['项目分类', '数据流概述', '推进力单位与施力关系'] },
+  { file: '_site/docs/architecture/roadmap/index.html', anchors: ['开发阶段', '下一步', '验证证据'] },
+  { file: '_site/docs/operations/verification/index.html', anchors: ['推进力单位换算', '历史验证数值'] },
+  { file: '_site/docs/issues/code-status/index.html', anchors: ['源码与工作区状态限定说明'] }
+];
+
+let anchorPass = 0;
+let anchorFail = 0;
+
+for (const test of anchorTests) {
+  if (!fs.existsSync(test.file)) {
+    console.log(`❌ ${test.file} 文件不存在`);
+    anchorFail += test.anchors.length;
+    continue;
+  }
+  const content = fs.readFileSync(test.file, 'utf8');
+  for (const anchor of test.anchors) {
+    const anchorId = anchor.replace(/\s+/g, '');
+    if (content.includes(`id="${anchorId}"`) || content.includes(`id='${anchorId}'`)) {
+      console.log(`✅ ${path.basename(path.dirname(test.file))} #${anchor}`);
+      anchorPass++;
+    } else {
+      console.log(`❌ ${path.basename(path.dirname(test.file))} #${anchor} 锚点ID未找到`);
+      anchorFail++;
+    }
+  }
+}
+
+console.log(`\n锚点测试: ${anchorPass}通过 / ${anchorFail}失败`);
+
+if (anchorFail > 0) {
+  console.error('\n❌ 部分锚点测试失败');
+  process.exit(1);
+}
+
 console.log('\n=== Test Complete ===');
 
 const allPassed = queryTestsPassed && verificationPassed;
