@@ -1,5 +1,69 @@
-// Site title display optimization - ensure "Unity无人艇工程" displays completely in one line
+// SVG diagram display optimization
+.diagram,
+.diagram svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin: 1rem auto;
+}
 
+// Legend styles for data flow diagram
+.legend {
+  list-style: none;
+  padding-left: 0;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.legend li {
+  display: inline-block;
+  margin-right: 1rem;
+  margin-bottom: 0.25rem;
+}
+
+.legend i {
+  font-style: normal;
+  font-weight: 600;
+}
+
+.sw-ros { color: #2e7d32; }
+.sw-adp { color: #1565c0; }
+.sw-unity { color: #e65100; }
+.sw-key { color: #6a1b9a; }
+
+// MathML formula fallback - only show HTML when MathML not supported
+.formula math {
+  display: inline;
+}
+
+.formula .fallback-html {
+  display: none;
+}
+
+@supports not (math-style: compact) {
+  .formula math {
+    display: none;
+  }
+  .formula .fallback-html {
+    display: inline;
+    font-style: italic;
+  }
+}
+
+// Review flags for security/accuracy notices
+.review-flag {
+  background-color: #fff3cd;
+  border-left: 4px solid #ffc107;
+  padding: 0.5rem 1rem;
+  margin: 1rem 0;
+  font-size: 0.875rem;
+}
+
+.review-flag::before {
+  content: "⚠️ ";
+}
+
+// Site title display optimization - ensure "Unity无人艇工程" displays completely
 .site-title {
   white-space: nowrap;
   overflow: visible;
@@ -11,13 +75,16 @@
   padding-bottom: 0.75rem;
 }
 
-// Mobile header: prevent overflow, allow slight truncation if needed
+// Mobile header: ensure complete display without ellipsis
 @media (max-width: 50rem) {
   .site-title {
-    font-size: 1.25rem;
+    font-size: 1.125rem;  // Slightly reduced but still readable
     white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: calc(100vw - 4rem);
+    max-width: calc(100vw - 3.5rem);  // Space for menu button
+  }
+  
+  .site-header {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
   }
 }
