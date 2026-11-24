@@ -1,7 +1,7 @@
-# Unity无人艇工程文档 — Just the Docs (native theme)
+# Unity无人艇工程 — Just the Docs (native theme)
 # Theme: just-the-docs 0.12.0 (MIT). Do not replace this with a hand-built skin.
 
-title: Unity无人艇工程文档
+title: Unity无人艇工程
 description: 以 Unity3D 为核心的无人艇工程文档。MARUS 2.0 是当前复用基线，不是最终目标。
 theme: just-the-docs
 color_scheme: light

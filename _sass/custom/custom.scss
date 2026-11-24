@@ -1,63 +1,23 @@
-// Official Just the Docs customization hook (_sass/custom/custom.scss).
-// Do not change theme link / sidebar / brand colors here.
+// Site title display optimization - ensure "Unity无人艇工程" displays completely in one line
 
-.diagram {
+.site-title {
+  white-space: nowrap;
   overflow: visible;
-  margin: 1rem 0;
+  text-overflow: clip;
 }
 
-.diagram svg {
-  display: block;
-  width: 100%;
-  max-width: 100%;
-  height: auto;
+.site-header {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
 }
 
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem 1rem;
-  margin: 0 0 0.75rem;
-  padding: 0;
-  list-style: none;
-}
-
-.legend i {
-  display: inline-block;
-  width: 0.75rem;
-  height: 0.75rem;
-  margin-right: 0.35rem;
-  border: 1px solid #eeebee;
-  border-radius: 2px;
-  vertical-align: -0.1rem;
-}
-
-.sw-ros { background: #ebf3ff; }
-.sw-adp { background: #fff9c8; }
-.sw-unity { background: #f5f6fa; }
-.sw-key { background: #f5f6fa; border-style: dashed; }
-
-/* Formula: show HTML only when MathML is unsupported; never both. */
-.formula {
-  margin: 1rem 0;
-  text-align: center;
-  overflow-x: auto;
-}
-.formula > math { display: none; }
-.formula-html { margin: 0; font-size: 1.25em; }
-.formula-html sub { font-size: 0.75em; }
-.formula-note {
-  margin: 0.5rem 0 0;
-  text-align: left;
-}
-@supports (math-style: normal) {
-  .formula > math[display="block"] {
-    display: block math;
-    font-size: 1.35em;
+// Mobile header: prevent overflow, allow slight truncation if needed
+@media (max-width: 50rem) {
+  .site-title {
+    font-size: 1.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100vw - 4rem);
   }
-  .formula-html { display: none !important; }
-}
-
-.review-flag {
-  font-size: 0.85em;
 }

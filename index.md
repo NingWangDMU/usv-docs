@@ -2,11 +2,11 @@
 title: 首页
 layout: home
 nav_order: 1
-description: Unity无人艇工程文档：项目蓝图、可复现验证记录与新手指南
+description: Unity无人艇工程：项目蓝图、可复现验证记录与新手指南
 permalink: /
 ---
 
-# Unity无人艇工程文档
+# Unity无人艇工程
 {: .fs-9 }
 
 建设以Unity3D为核心、贯通仿真建模、算法开发、智能训练、系统测试与实艇验证的一体化平台。
