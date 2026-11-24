@@ -19,7 +19,7 @@ nav_order: 3
 
 | 项目 | 证据摘要 | 边界 | 状态 |
 | --- | --- | --- | --- |
-| 连接 | 首次 Ping 成功；话题配置路径收到完整 `NavSatFix` | 仅通道与消息可达 | 已验证 |
+| 连接 | 首次 Ping 成功；话题 `/marus_boat/gps` 收到完整 `NavSatFix` | 仅通道与消息可达 | 已验证 |
 | 推进求值与施力 | 输入示例 → 曲线输出 → 换算后的力；同实例 `FixedUpdate` 的 `AddForceAtPosition` 记录到后显式归零 | 只验证调用链，不是动力学 | 调用链已验证 |
 | 本地键盘 | `ASVPrimitiveController` 直接改 `Transform`，WASD 有效 | 非物理路径；需焦点与 `activeAgent` | 已验证 |
 | 艇体速度 / 位移 | 尚未记录到与施力对应的速度或位移 | 待批准的下一工作包 | 待验证 |
