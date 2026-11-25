@@ -2,7 +2,7 @@
 title: 环境与工程锁定
 parent: 运行与验收
 nav_order: 1
-last_modified_date: 2026-11-24
+last_modified_date: 2026-11-25
 ---
 
 # 环境与工程锁定
@@ -34,11 +34,12 @@ last_modified_date: 2026-11-24
 
 ## 工程结构（关键部分）
 
-下列目录摘自既有运行说明，用于对照脚本职责，不是一次新的仓库扫描。
+下列目录摘自既有运行说明，并补记 2026-11-25 另存的测试场景。这不是一次新的全仓库扫描。
 
 ```
 marus2-example/
 ├── Assets/Scenes/ExampleScene.unity
+├── Assets/Scenes/ExampleScene_Stage1MotionAcceptance.unity
 └── Assets/marus2-modules/marus2-core/Runtime/
     ├── Ros/RosConnection.cs              # gRPC 客户端
     ├── Controllers/
@@ -48,6 +49,8 @@ marus2-example/
         ├── Thruster.cs
         └── ThrusterController.cs         # 求值与施力路径
 ```
+
+`ExampleScene_Stage1MotionAcceptance.unity` 是 2026-11-25 由 `ExampleScene` **另存**得到的独立测试场景。原 `ExampleScene` 没有被这次验收覆盖保存。该测试场景中仅关闭了 `marus_boat` 上的 `ASV Primitive Controller`，并且没有对 Prefab 执行 Apply。详见 [源码与状态限定]({% link docs/issues/code-status.md %}#测试场景与原场景边界)。
 
 ---
 
@@ -61,9 +64,12 @@ marus2-example/
 | `$ROS2_WS` | ROS 2工作空间目录 |
 | `$BACKUP_PATH` | 本地备份目录 |
 
+步骤记录器 `UsvStepLog` 的 CSV 写在 `Application.persistentDataPath/usv-records`。2026-11-25 在本机示例工程中，该目录对应 `$HOME/.config/unity3d/LABUST/marus2-example/usv-records`。这是实测路径，不是新功能。
+
+`$HOME/usv-projects/logs` **不是**上述 CSV 目录。该路径在本机只见过适配器日志（如 `adapter.log`）。隔离工程的记录目录与此不同，见 [已有验证结果 §记录器局部验证]({% link docs/operations/verification.md %}#记录器局部验证) 中的 `$RECORDS_DIR`。
+
 {: .note }
-实际部署时请将占位符替换为您的实际路径。
+实际部署时请将占位符替换为您的实际路径。不要把个人主目录的绝对路径写进页面正文。
 
 {: .metadata }
-**页面元数据**: 文档整理日期 2026-11-24 · 内容版本: 文档架构迁移 1.0 (标题更新) · 来源: 历史交接锁定版本，未重新实测当前工作区 · 状态: 迁移完成
-
+**页面元数据**: 文档整理日期 2026-11-25 · 锁定版本表仍为 2026-11-24 交接记录，本次未重新扫描工作区 HEAD · 测试场景与 CSV 目录为 2026-11-25 本机实测补记 · 状态: 2026-11-25 已纳入站点，记录阶段 1 测试场景运动验收实测
