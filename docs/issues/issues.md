@@ -15,9 +15,8 @@ permalink: /docs/issues
 
 <dl>
 <dt><a href="{% link docs/issues/known-issues.md %}">已知问题清单</a></dt>
-<dd>渲染异常、GPS待验证、速度位移响应等已知问题</dd>
+<dd>渲染异常、GPS待验证、动力学精度未评价等已知问题</dd>
 
 <dt><a href="{% link docs/issues/code-status.md %}">源码与状态限定</a></dt>
-<dd>当前HEAD与历史脚本差异、未跟踪备份、未保存场景、MARUS许可证边界</dd>
+<dd>当前HEAD与历史脚本差异、未跟踪备份、原场景与测试场景边界、MARUS许可证边界</dd>
 </dl>
-

@@ -21,11 +21,11 @@ permalink: /
 
 **MARUS 2.0 是当前复用基线**，不是项目的最终目标。现阶段先完成最小闭环复现与接口验证，再逐步接入自有模块。
 
-**当前阶段**：阶段 1 · 原版最小闭环（进行中）  
-**下一步**：短时速度/位移验收（待批准）
+**当前阶段**：阶段 1 · 原版最小闭环（进行中；速度 / 位移已记录）  
+**下一步**：GNSS 精度 / 频率 / 坐标系核验（待批准）
 
 {: .warning }
-本站工程结论是历史验证基线，不是打开页面时的实时复查。
+本站工程结论是已整理的验证记录，不是打开页面时的实时复查。速度与位移已有 2026-11-25 测试场景的本机实测记录，仍**不能写成动力学已验证**。
 
 ---
 
@@ -35,16 +35,16 @@ permalink: /
 
 ### 📐 项目与架构
 - [项目总览]({% link docs/architecture/overview.md %}) - 项目分类、数据流、推进力单位与施力关系
-- [阶段路线与进度]({% link docs/architecture/roadmap.md %}) - 开发阶段、验收要点、历史验证证据
+- [阶段路线与进度]({% link docs/architecture/roadmap.md %}) - 开发阶段、验收要点、历史验证与本机实测证据
 
 ### ⚙️ 运行与验收
 - [环境与工程锁定]({% link docs/operations/environment.md %}) - Unity 6000.5.11f1、ROS2 Jazzy、锁定SHA
-- [可复现操作]({% link docs/operations/procedures.md %}) - 启动适配器、WASD控制
-- [已有验证结果]({% link docs/operations/verification.md %}) - 历史验证记录、单位换算、施力公式
+- [可复现操作]({% link docs/operations/procedures.md %}) - 启动适配器、WASD控制、测试场景运动记录
+- [已有验证结果]({% link docs/operations/verification.md %}) - 历史验证记录、单位换算、测试场景运动验收
 
 ### ⚠️ 问题与记录
-- [已知问题清单]({% link docs/issues/known-issues.md %}) - 渲染异常、GPS待验证、响应未验收
-- [源码与状态限定]({% link docs/issues/code-status.md %}) - HEAD差异、未保存场景、许可证边界
+- [已知问题清单]({% link docs/issues/known-issues.md %}) - 渲染异常、GPS待验证、动力学精度未评价
+- [源码与状态限定]({% link docs/issues/code-status.md %}) - HEAD差异、原场景未覆盖保存、许可证边界
 
 </div>
 
@@ -65,7 +65,6 @@ permalink: /
 
 本文档使用 [Just the Docs](https://just-the-docs.com) Jekyll主题构建，托管在GitHub Pages。
 
-- 所有本地文件路径已替换为环境变量占位符
+- 所有本地文件路径已替换为环境变量占位符或可移植写法
 - 源码遵循MIT许可证
 - 欢迎通过 [GitHub Issues](https://github.com/NingWangDMU/usv-docs/issues) 反馈
-
