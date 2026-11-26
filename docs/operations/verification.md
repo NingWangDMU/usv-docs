@@ -20,11 +20,11 @@ last_modified_date: 2026-11-25
 
 | 项目 | 证据摘要 | 边界 | 状态 |
 | --- | --- | --- | --- |
-| 连接 | 首次 Ping 成功；话题 `/marus_boat/gps` 收到完整 `NavSatFix` | 仅通道与消息可达 | 已验证 |
+| 连接 | 首次 Ping 成功；话题 `/marus_boat/gps` 收到完整 `NavSatFix`。2026-11-25 GNSS 抽查再次收到完整消息 | 仅通道与消息可达，不是定位精度 | 已验证 |
 | 推进求值与施力 | 输入示例 → 曲线输出 → 换算后的力；同实例 `FixedUpdate` 的 `AddForceAtPosition` 记录到后显式归零。2026-11-25 测试场景 CSV 再次记录到同一输入点的请求推力 1.961417 N，并在同一次运行中记录到显式三零 | 只验证调用链与请求清零，不是动力学 | 调用链已验证 |
 | 本地键盘 | `ASVPrimitiveController` 直接改 `Transform`，WASD 有效 | 非物理路径；需焦点与 `activeAgent` | 已验证 |
 | 艇体速度 / 位移 | 2026-11-25 测试场景已记录到与非零脉冲施力窗对应的前向速度与位移；同一次运行中的显式三零把请求推力清为 0 N，并新开零力保持窗。运动幅度只作对照，不是通过标准 | 仅测试场景；不评价动力学精度；CSV 不能单独证明刚体名为 `marus_boat`；超时停力不等于清零 `LastForceRequest` | 已记录（本机实测） |
-| GPS 精度 / 频率 / 坐标 | 尚无验收结果 | 不得把收到消息写成定位正确。2026-11-25 运动验收未覆盖本项 | 待验证 |
+| GPS 精度 / 频率 / 坐标 | 2026-11-25 测试场景已记录三项结论：发布频率与设定不一致（消息头间隔约 0.0400 s，对应约 25.000 Hz，设定为 100 Hz）；坐标系约定已部分核对；数值正确性按当时条件无法核验 | 不得把话题有消息、协方差、`isRTK` / 状态枚举，或与同一套 `Unity2Geo` 换算链的互相比对升级为定位已验收。墙钟接收频率未测到。详见 [§GNSS / GPS 精度、发布频率与坐标系约定](#gnss-gps-约定核验) | 已记录（本机实测；精度无法核验） |
 | 步骤记录器局部行为 | 1153 纯逻辑 196 项检查；原工程经脚本 1220 升级后编译 0 错误、61 警告且未进入 Play；隔离工程手动阶段与四次自动计划已审阅通过 | 合成记录。不是真实 `AddForce`、推进器、水动力、ROS、训练或实艇验收。活动会话直接退出 Editor 的 `OnApplicationQuit` 分支未单测。该范围说明不否定其后测试场景中的真实施力记录 | 局部已验证 |
 
 ---
@@ -85,7 +85,7 @@ last_modified_date: 2026-11-25
 | --- | --- |
 | 本机实测 | 四份 CSV 中的输入、请求推力、施力窗、速度与位移记录 |
 | 方案估计 | 无阻力计划对照速度约 `0.002615` m/s，只作对照，不设通过阈值 |
-| 未验证 | GPS 精度 / 频率 / 坐标系；完整推进曲线；动力学精度；CSV 所对应的 GameObject 名称 |
+| 未验证（该次运动验收范围内） | 该次未覆盖 GPS 精度 / 频率 / 坐标系（同日稍后另做核验，见 [§GNSS / GPS 精度、发布频率与坐标系约定](#gnss-gps-约定核验)）；完整推进曲线；动力学精度；CSV 所对应的 GameObject 名称 |
 | 官方 / 源码结论 | 历史单位换算 1 kgf = 9.80665 N；`force_after` 的 `phase` 为 `after_add_force_call_not_solve`，表示 `AddForce` 调用之后，不是解算之后 |
 
 超时（约 0.20 秒仿真时间）会停止继续 `AddForce`，但不会清掉 `LastForceRequest`。停止发布者、停止适配器或退出 Play，都不是显式归零。
@@ -130,13 +130,154 @@ last_modified_date: 2026-11-25
 
 ### 本项尚未覆盖
 
-- GPS / GNSS 精度、发布频率与坐标系，仍为**未验证**
+- GPS / GNSS 精度、发布频率与坐标系：该次运动验收未覆盖。同日稍后的核验结论见 [§GNSS / GPS 精度、发布频率与坐标系约定](#gnss-gps-约定核验)，不得把本节读成该项仍完全未经记录，也不得读成定位已验收
 - 完整 *C*(*u*) 曲线，以及动力学精度或通过阈值
 - 用 CSV 单独证明 GameObject 名称
 - 粉色地形与 Vulkan 缺少 `_WaterCameraHeightBuffer` / `_WaterLine` 仍为已知问题；本次 Play 中再次出现，不是新错误，也未自动消失
 - 把超时停力、停止发布或退出 Play 写成显式归零
 
 ---
+
+---
+
+## GNSS / GPS 精度、发布频率与坐标系约定 {#gnss-gps-约定核验}
+
+整理日期：2026-11-25，时区 America/Los_Angeles（PST，UTC-8）。本机实测约在当天 11:50–12:12（PT）。工程机终端与 Unity Console 的本地日志时间约为 2026-11-26 03:50–04:06，推断为 UTC+8，与 PT 相差 16 小时，互相一致。性质：**本机实测**，仅测试场景。不发推力，不保存场景。
+
+本次记录到已发布完成标准所允许的结论路径：发布频率与坐标系约定有可核对的记录，数值正确性按当时条件无法核验。这满足「记录到可核对的精度、发布频率或坐标系约定结论；或明确记下当时无法核验的条件」。**不得**把话题有消息写成定位已验收，也**不得**写成 GPS 精度已通过。
+
+### 测了什么、没测什么
+
+先分清三种时间基准。不要把它们混成同一个「频率」。
+
+| 时间基准 | 本次怎么用 | 本次结果 |
+| --- | --- | --- |
+| 设定值 | Inspector 里的 `SampleFrequency` / `GnssGrpc.UpdateFrequency` | 均为 100。这只是配置，**不是**已测到的话题频率。`TfStreamerGrpc.UpdateFrequency` 为 1，那是 TF，不是 NavSatFix 频率 |
+| 消息头时间戳间隔 | 用 `/marus_boat/gps` 的 `header.stamp` 计算相邻间隔。该时间戳来自 `TimeHandler.TimeDouble`，**不是**墙钟，也不要把它换算成本次试验的日历时间 | 80 条样本的平均间隔约 0.0400 s，对应约 25.000 Hz，与设定 100 Hz 不一致 |
+| 墙钟接收频率 | 订阅端按计算机墙钟统计的接收速率，例如 `ros2 topic hz --wall-time`。官方说明也写了：这可能受机器和 QoS 影响，不必等于发布端设定 | 本次因 `ros2 topic hz` 不接受 `--no-daemon` 报错而即停，未重试，也未另批补测，故**没有**正式 `hz` 统计。Python 抽样的 `elapsed_wall_s=3.520` 只是附带观察（含发现延迟），与 25 Hz 同量级、不像 100 Hz，但不是 `ros2 topic hz` 结果 |
+
+本次还核过：话题是否仍能收到完整 `NavSatFix`；`header.frame_id` 与组件 Frame Id 是否一致；当时实际原点；静止样本是否与 Inspector 的 Point 一致到很高位。本次**没有**做位移方向检查，**没有**独立真值，**没有**把纬度差换算成米作为结论，也**没有**拆开验证频率差异发生在采样、发送还是适配器。
+
+### 场景与连接条件
+
+- 独立测试场景 `Assets/Scenes/ExampleScene_Stage1MotionAcceptance.unity`。原 `ExampleScene` 没有被覆盖保存；`ASV Primitive Controller` 仍关闭；没有对 Prefab 执行 Apply。退出 Play 时不保存。详见 [源码与状态限定]({% link docs/issues/code-status.md %}#测试场景与原场景边界)。
+- 适配器为已发布启动方式：回环 `127.0.0.1:30052`。日志出现 `gRPC ROS adapter server running on 127.0.0.1:30052`。ROS 2 Jazzy。`ROS_DOMAIN_ID` 未设置。官方示例 README 里曾经出现过默认端口 50051，**不是**本次使用的端口。
+- 第 0 段只读核对该次锁定提交，与已发布锁定一致：example `0f9ec3f8a4a30126bcbed8ddbf90800fafa33f06`；core `747bcee11adfa0f4bbd60db698b24794ab5581c8`；sensors `c88714d750d0b0d99dcfde77694ec5f37d407ec5`；sensors-grpc `485146512c8011a1586570d635e8f240ee43f667`；proto `807af27a08b242748232c6ef87f0d68a675d2040`；adapter `7af7a0b492bb8c55948a2c839a9f077b7cfe4173`。
+- 场景里没有 `GeoOrigin`。`ros2 param list --no-daemon --spin-time 2` 按 origin / latitude / longitude / d2 / LocalOrigin 过滤后为 `matched_lines=0`。因此没有在运行时发现 `/d2/LocalOriginLat` 或 `/d2/LocalOriginLon` 被实际写入。
+- Prefab 中 `gps` 物体的本地坐标为 `{x: 0, y: 1.35, z: 0.65}`（第 0 段本机 YAML 只读核对）。
+- 粉色地形仍存在。Console 可见原有 Vulkan 水体警告（缺少 `_WaterCameraHeightBuffer` / `_WaterLine`），错误计数为 0。这些只记「仍存在」，不作为本包失败条件，也不在本包修理。
+
+第 2 段 Play 运行时，Inspector 手抄值如下（只看，未改）。插图均为当时截图原件，不是生成图。
+
+![Play 运行时 GnssSensor Inspector]({{ '/assets/images/gnss-20261125/01-gnss-sensor-inspector.png' | relative_url }})
+
+`GnssSensor` 启用：Frame Id `marus_boat/gps_frame`，Sample Frequency 100，NoiseType `NoNoise`，isRTK 勾选，Maximum Operating Depth 0.5；Point 纬度为 `44.9999162186072`、经度为 `15.000000067459403`、高度为 `1.1507192966571342`；Origin 纬度为 45、经度为 15、高度为 0。
+
+![Play 运行时 GnssGrpc Inspector]({{ '/assets/images/gnss-20261125/02-gnss-grpc-inspector.png' | relative_url }})
+
+`GnssGrpc` 启用：Update Frequency 100，Address `marus_boat/gps`，Message Queue Size 10000。
+
+![Play 运行时 TfStreamerGrpc Inspector]({{ '/assets/images/gnss-20261125/03-tf-streamer-grpc-inspector.png' | relative_url }})
+
+`TfStreamerGrpc` 启用：Update Frequency 1（这不是 NavSatFix 频率），Parent `marus_boat`，Parent Frame Id `marus_boat/base_link`，Frame Id `marus_boat/gps_frame`。
+
+![Play 运行时 RosConnection Inspector]({{ '/assets/images/gnss-20261125/04-rosconnection-inspector.png' | relative_url }})
+
+`RosConnection`：serverIP `localhost`，serverPort 30052，Realtime Simulation 开，Origin Frame Name `map`，OriginFrameLatitude `/d2/LocalOriginLat`，OriginFrameLongitude `/d2/LocalOriginLon`，DefaultLatitude 45，DefaultLongitude 15。Console 记有 `[04:00:51] Connected to the ROS Server` 与 `[04:06:32] Shut down of grpc channel successful`（工程机本地时钟，推断为 UTC+8）。
+
+![测试场景 Play 中的编辑器与 Console]({{ '/assets/images/gnss-20261125/05-editor-console-scene.png' | relative_url }})
+
+### 必须分开的结论类型
+
+| 类型 | 本项怎么用 |
+| --- | --- |
+| 本机实测 | 话题抽查、消息字段原数、Inspector 手抄值、`header.stamp` 间隔统计、参数列表过滤结果、收尾时端口已释放 |
+| 官方资料 | ROS 2 Jazzy 对 `NavSatStatus` / `position_covariance_type` 的枚举含义；无 `GeoOrigin` 时原点来自 `RosConnection` 默认纬度 / 经度，连接后可被 `/d2/LocalOriginLat`、`/d2/LocalOriginLon` 改写；`Unity2Map` 为 Unity `(x, y, z)` → ENU `(x, z, y)`；`GnssGrpc` 与适配器都未赋值协方差。这些是源码或消息定义，不是本次用位移证明了公式 |
+| 附带观察 | Python 抽样的墙钟耗时 `elapsed_wall_s=3.520`，不是 `ros2 topic hz` 结果 |
+| 未验证 / 未做 | 数值正确性（无独立真值）；墙钟接收频率的正式 `hz` 统计；频率差异原因；位移方向检查；把纬度差换算成米 |
+
+### 第 1 段：完整消息抽查
+
+话题列表中有 `/marus_boat/gps`。`ros2 topic info` 显示类型为 `sensor_msgs/msg/NavSatFix`，发布者为 1，订阅者为 0。抽到的一条完整消息如下。完整消息指能看到 `header`（含 `stamp` 和 `frame_id`）、`status`、`latitude`、`longitude`、`altitude` 以及协方差相关字段。协方差即使是全 0，也不算消息不完整。
+
+| 字段 | 记录值 |
+| --- | --- |
+| `header.stamp` | `sec: 1795636358`，`nanosec: 42793751`（`TimeHandler.TimeDouble`，不是墙钟） |
+| `header.frame_id` | `marus_boat/gps_frame` |
+| `status.status` | 2 |
+| `status.service` | 1 |
+| `latitude` | `44.99991621787778` |
+| `longitude` | `15.000000067510223` |
+| `altitude` | `1.150719296657085` |
+| `position_covariance` | 9 个 0.0 |
+| `position_covariance_type` | 0 |
+
+适配器日志目录为 `$HOME/.ros/log/2026-11-26-03-50-46-300422-ning-wang-ThinkPad-P16-Gen-3-113066`。这一段只证明当时仍能收到完整消息，不能单独结束本包，也不能写成定位已验收。
+
+### 第 2 段：发布频率
+
+设定值见上文 Inspector：采样与 GNSS 发送均为 100。消息头时间戳抽样使用 sensor_data QoS，目标 80 条，超时 8 s，实际 `collected=80`，`elapsed_wall_s=3.520`。结果按原数抄录：
+
+| 项 | 记录值 |
+| --- | --- |
+| `stamp_first` | `1795637079.2901325` |
+| `stamp_last` | `1795637082.4501314` |
+| `stamp_span_s` | `3.159998893737793` |
+| `dt_count` | 79 |
+| `dt_mean_s` | `0.03999998599668093` |
+| `dt_min_s` | `0.039999961853027344` |
+| `dt_max_s` | `0.040000200271606445` |
+| `dt_std_s` | `7.192620921927455e-08` |
+| `freq_from_stamp_mean_hz` | `25.000008752077484` |
+
+间隔非常稳定，均值约 0.0400 s，对应约 25.000 Hz，与设定的 100 Hz **不一致**。差异卡在采样、发送还是适配器，本次没有拆开验证。不要另设通过或失败阈值，也不要把 Prefab 或 Inspector 上的 100 写成已经测到的话题频率。
+
+同一次抽样的第一条消息为：`frame_id` `marus_boat/gps_frame`，`status` 2，`service` 1，纬度为 `44.9999162186072`，经度为 `15.000000067453241`，高度为 `1.1507191775872645`，协方差全为 0，`position_covariance_type` 为 0。
+
+墙钟命令 `timeout -s INT 15 ros2 topic hz /marus_boat/gps --window 200 --wall-time --no-daemon --spin-time 2` 失败，报错为 `ros2: error: unrecognized arguments: --no-daemon`。已按报错即停，未重试。因此墙钟接收频率本次没有正式 `hz` 统计。
+
+### 第 2 段：坐标系约定
+
+第 2 段开始时抽到的一条静止样本为：`frame_id` `marus_boat/gps_frame`，`status` 2，`service` 1，纬度为 `44.9999162186072`，经度为 `15.000000067454103`，高度为 `1.150718821082211`，协方差全为 0，`position_covariance_type` 为 0。
+
+- `header.frame_id` 为 `marus_boat/gps_frame`，与 `GnssSensor` 和 TF 组件的 Frame Id 一致。
+- 当时原点按纬度 45、经度 15、高度 0 记录。依据是：场景中没有 `GeoOrigin`；参数列表未发现可改写原点的匹配项；Inspector 中 Origin 仍为 45 / 15 / 0，与 `RosConnection` 的 DefaultLatitude / DefaultLongitude 一致。官方源码还写了：连接成功后可以尝试用 `/d2/LocalOriginLat`、`/d2/LocalOriginLon` 改写原点；本次运行没有发现这些参数，所以把 45 / 15 / 0 记为当时实际原点，而不是把默认值写成不可被改写的永久事实。
+- 静止样本与 Inspector 的 Point（纬度 `44.9999162186072`、经度 `15.000000067459403`、高度 `1.1507192966571342`）一致到很高位：纬度在第 2 段 echo 与 Python 首条消息中完全相同；经度、高度在最后几位有微小差别。这只说明话题和同一套 `Unity2Geo` 换算链一致，**不是**独立精度。
+- 该样本接近原点但并不重合：纬度约小 \(8.378\times 10^{-5}\) 度，经度几乎重合，高度约 1.151 m。这符合传感器挂在 `gps` 子物体上、而不是场景原点这一设定。本次没有另批位移试验，也没有把纬度差换算成米作为结论。
+- 官方源码中的 `Unity2Map`（Unity `(x, y, z)` → ENU `(x, z, y)`）只作为约定记录。位移方向检查未批准、未做，因此不能写成这次已经用运动证明了轴向。
+
+### 第 2 段：数值正确性
+
+**无法核验。** 这是已发布完成标准允许的合格路径，不是把精度写成已经通过。
+
+当时条件如下：
+
+- 没有独立于这套换算链的第二数据源或外部真值。
+- 噪声类型为 `NoNoise`，不能当作已经过噪声模型标定。
+- 协方差全为 0，`position_covariance_type` 为 0。按 ROS 2 Jazzy 的 `NavSatFix` 定义，0 表示 `COVARIANCE_TYPE_UNKNOWN`。官方源码上 `GnssGrpc` 与适配器都未赋值协方差，与本次观测一致。不要把全 0 协方差写成已给出的精度指标。
+- `isRTK` 已勾选。消息 `status` 为 2、`service` 为 1。按 ROS 2 Jazzy 的 `NavSatStatus` 定义，2 为 `STATUS_GBAS_FIX`，1 为 `SERVICE_GPS`。这只是枚举对应，不能当精度证据。
+
+枚举定义见：[NavSatFix.msg](https://github.com/ros2/common_interfaces/blob/jazzy/sensor_msgs/msg/NavSatFix.msg)、[NavSatStatus.msg](https://github.com/ros2/common_interfaces/blob/jazzy/sensor_msgs/msg/NavSatStatus.msg)。引用这些定义只说明字段本身的含义，不表示本项目已经按该定义提供了可核验的精度。
+
+### 三项结论汇总
+
+| 项 | 结论 | 不得写成 |
+| --- | --- | --- |
+| 发布频率 | 设定 100 Hz；消息头时间戳间隔稳定约 0.0400 s，对应约 25.000 Hz，与设定不一致。差异原因未拆开验证。墙钟 `hz` 未测到 | 已按 100 Hz 发布；频率已验收通过或失败（本次未设阈值） |
+| 坐标系约定 | `frame_id` 与组件一致；当时原点按 45 / 15 / 0 记录；静止样本与 Inspector Point 一致到很高位（链路一致性）；样本接近原点但不重合，符合传感器在 `gps` 子物体上。未做位移试验 | 地球换算公式已由本次位移证明；独立定位精度已核过 |
+| 数值正确性 | 无法核验。条件见上一小节 | 定位已验收；GPS 精度已通过；`isRTK` / GBAS_FIX / 协方差证明了精度 |
+
+### 会话收尾
+
+上述会话结束后已退出 Play，弹出保存则选择不保存。适配器随后用 Ctrl+C 停止，进程正常结束，`ss -ltnp 'sport = :30052'` 仅有表头、无监听。关闭过程中出现过 rosout「publisher's context is invalid」，与既知记录一致，按 ROS 2 拆除时的常见提示记录，不作为新的项目缺陷写入已知问题清单。
+
+### 本项尚未覆盖
+
+- 墙钟接收频率的正式 `hz` 统计；补测须另批，本稿不授权自动重试
+- 把发布频率差异拆开到采样、发送或适配器
+- 位移方向检查，以及用独立真值核验数值正确性
+- 完整 *C*(*u*) 曲线，以及动力学精度（本包范围之外，阶段 1 仍为进行中）
+- 粉色地形与 Vulkan 缺少 `_WaterCameraHeightBuffer` / `_WaterLine` 仍为已知问题；本次 Play 中再次出现，不是新错误，也未自动消失，不在本包修理
 
 ## 已知现象
 
@@ -148,7 +289,7 @@ last_modified_date: 2026-11-25
 | Vulkan 报缺少水面高度缓冲 | 控制台警告 | 记录中 |
 | `RNG_CS.compute` 缺少 `#pragma kernel` | 编译警告 | 记录中 |
 
-2026-11-25 测试场景 Play 中再次出现粉色地形与上述 Vulkan 警告，不作为新错误，也未自动消失。详见 [已知问题清单]({% link docs/issues/known-issues.md %})。
+2026-11-25 测试场景在运动验收与其后 GNSS 核验的 Play 中均再次出现粉色地形与上述 Vulkan 警告，不作为新错误，也未自动消失。GNSS 会话中 Console 错误计数为 0。这些现象不作为 GNSS 包的失败条件。详见 [已知问题清单]({% link docs/issues/known-issues.md %})。
 
 {: .warning }
 现象影响待查，**未归因于显卡驱动**。
@@ -161,6 +302,8 @@ last_modified_date: 2026-11-25
 
 「阶段 1 测试场景运动验收」为 2026-11-25 本机实测，依据已上传的四份 CSV 与当时终端、截图回传。CSV 只以可移植路径和 SHA256 标识，原始文件不作为本站公开附件。
 
+「GNSS / GPS 精度、发布频率与坐标系约定」为同日稍后的本机实测，依据当时终端输出与 Play 中 Inspector / 编辑器截图。截图随文档仓库提供；适配器与 `ros2` 终端全文不作为公开附件。墙钟 `hz` 未测到，补测须另批。
+
 {: .note-title }
 > 内容来源
 >
@@ -168,6 +311,7 @@ last_modified_date: 2026-11-25
 > - **推进力单位**: 迁移自原 `units.md` §定义
 > - **历史验证数值**: 迁移自原 `units.md` §历史记录中的一个输入点；同日补记 CSV 六位小数核对，不替换历史来源
 > - **阶段 1 测试场景运动验收**: 2026-11-25 本机实测。整理时对照已上传文件复核了四份 CSV 的字节数、SHA256、行数与输入组
+> - **GNSS / GPS 精度、发布频率与坐标系约定**: 2026-11-25 同日稍后本机实测。整理时按回传终端与截图原数抄录，未改数，也未把纬度差换算成米作为结论
 > - **已知现象**: 迁移自原 `results.md` §已知现象；同日补记再次出现，未改归因
 > - **验证边界说明**: 迁移自原 `results.md` §验证边界说明，并区分历史基线与本次实测
 > - **记录器局部验证**: 2026-11-25 已审阅证据。原始终端、Console 全文与 Editor.log 不作为公开附件。本节正文除范围提示外保持原样
@@ -267,4 +411,4 @@ last_modified_date: 2026-11-25
 | `lifecycle-disable` | `lcd20261125T121130Z-1053849` | Editor.log `4c88329a7e25eb89cdbcda9566a1146ce34a7572e4db7c3889233504914f6361`；证据 JSON `940a5a9631e6884dc30764dff216f32b09a411f0334f123d3c4a8bc87ad3de65`；两份新 CSV 的内容哈希同为 `037e3640138b35e8cfbf1ccc27e8f96d7c6808f145df1748ae3570fb393c232a`（文本相同，不是同一文件） |
 
 {: .metadata }
-**页面元数据**: 文档整理日期 2026-11-25 · 历史验证记录、公式与历史数值仍为 2026-11-24 交接基线，未改写原记录值 · 阶段 1 测试场景运动验收为 2026-11-25 本机实测 · 记录器局部验证正文除范围提示外保持已审阅原文，原始日志未作为公开附件 · 状态: 2026-11-25 已纳入站点，记录阶段 1 测试场景运动验收实测
+**页面元数据**: 文档整理日期 2026-11-25 · 历史验证记录、公式与历史数值仍为 2026-11-24 交接基线，未改写原记录值 · 阶段 1 测试场景运动验收为 2026-11-25 本机实测，正文保持已发布结论 · GNSS 三项结论为同日稍后本机实测 · 记录器局部验证正文除范围提示外保持已审阅原文，原始日志未作为公开附件 · 状态: 2026-11-25 已纳入站点，记录 GNSS / GPS 精度、发布频率与坐标系约定核验实测
