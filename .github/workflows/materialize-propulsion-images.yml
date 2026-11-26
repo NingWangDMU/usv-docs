@@ -1,0 +1,65 @@
+name: Materialize propulsion curve images
+
+on:
+  push:
+    branches: ["docs/propulsion-steering-verification-20261125"]
+    paths:
+      - "assets/images/propulsion-20261125/*.b64"
+      - ".github/workflows/materialize-propulsion-images.yml"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: materialize-propulsion-images
+  cancel-in-progress: false
+
+jobs:
+  materialize:
+    if: github.ref == 'refs/heads/docs/propulsion-steering-verification-20261125'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          ref: docs/propulsion-steering-verification-20261125
+
+      - name: Decode curve figures and remove temporary files
+        run: |
+          set -euo pipefail
+          python3 << 'PY'
+          from pathlib import Path
+          import base64, hashlib
+          expected = {
+            "stage1_propulsion_curves.png": "71def80415f34f1833995dc00f1d7f54798f86cbe143264fac61a1bb0b6f1ec6",
+            "stage2_steering_yaw_curves.png": "9eee61e49aebc3984e5421294a0b46942860a65c7e0efe12033037f15646b934",
+            "stage2b_bow_reverse_curves.png": "e9e24d2ab2fdc609522c69d78058b10b2857a9bbef8b1bf6471a7a8c16647910",
+          }
+          root = Path("assets/images/propulsion-20261125")
+          for name, digest in expected.items():
+              src = root / f"{name}.b64"
+              if not src.exists():
+                  raise SystemExit(f"missing {src}")
+              data = base64.b64decode("".join(src.read_text().split()))
+              got = hashlib.sha256(data).hexdigest()
+              if got != digest:
+                  raise SystemExit(f"hash mismatch {name}: {got} != {digest}")
+              (root / name).write_bytes(data)
+              src.unlink()
+              print(f"wrote {name} sha256={got}")
+          PY
+          rm -f .github/workflows/materialize-propulsion-images.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "Nothing to commit"
+            exit 0
+          fi
+          git commit -m "$(cat <<'EOF'
+          docs: 写入推进与转向核验曲线图原件
+
+          从临时 base64 还原三张离线分析曲线图，并移除临时编码文件与一次性工作流。
+          EOF
+          )"
+          git push
