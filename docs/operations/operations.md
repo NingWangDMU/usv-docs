@@ -18,8 +18,9 @@ permalink: /docs/operations
 <dd>锁定的软件版本、Unity工程SHA、ROS2适配器SHA、工程结构、测试场景与记录目录</dd>
 
 <dt><a href="{% link docs/operations/procedures.md %}">可复现操作</a></dt>
-<dd>启动适配器（回环）、WASD键盘控制，以及 2026-11-25 测试场景运动验收的已完成操作记录</dd>
+<dd>启动适配器（回环）、WASD键盘控制，以及 2026-11-25 测试场景运动验收与 GNSS 核验的已完成操作记录</dd>
 
 <dt><a href="{% link docs/operations/verification.md %}">已有验证结果</a></dt>
-<dd>历史验证记录、推进力单位换算、测试场景运动验收、记录器局部验证、已知现象与验证边界</dd>
+<dd>历史验证记录、推进力单位换算、测试场景运动验收、GNSS 三项结论、记录器局部验证、已知现象与验证边界</dd>
 </dl>
+
