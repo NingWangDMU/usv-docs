@@ -18,5 +18,6 @@ permalink: /docs/architecture
 <dd>项目分类、数据流概述、SVG架构图、推进力单位与施力关系、新手术语解释</dd>
 
 <dt><a href="{% link docs/architecture/roadmap.md %}">阶段路线与进度</a></dt>
-<dd>开发阶段、当前状态、已记录的运动验收、下一步工作包、历史验证与本机实测证据</dd>
+<dd>开发阶段、当前状态、已记录的运动验收与 GNSS 三项结论、下一步工作包待定、历史验证与本机实测证据</dd>
 </dl>
+
