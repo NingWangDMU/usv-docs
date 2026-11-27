@@ -2,7 +2,7 @@
 title: 已有验证结果
 parent: 运行与验收
 nav_order: 2
-last_modified_date: 2026-11-25
+last_modified_date: 2026-11-27
 ---
 
 # 已有验证结果
@@ -25,6 +25,7 @@ last_modified_date: 2026-11-25
 | 本地键盘 | `ASVPrimitiveController` 直接改 `Transform`，WASD 有效 | 非物理路径；需焦点与 `activeAgent` | 已验证 |
 | 艇体速度 / 位移 | 2026-11-25 测试场景已记录到与非零脉冲施力窗对应的前向速度与位移；同一次运行中的显式三零把请求推力清为 0 N，并新开零力保持窗。同日稍后另有多档前向、左右单侧、艏侧与对称倒车的离散短脉冲记录。运动幅度只作对照，不是通过标准 | 仅测试场景；不评价动力学精度；CSV 不能单独证明刚体名为 `marus_boat`；超时停力不等于清零 `LastForceRequest`。详见 [§阶段 1 测试场景运动验收](#阶段-1-测试场景运动验收) 与 [§推进与转向闭环核验](#推进与转向闭环核验) | 已记录（本机实测；精度未评价） |
 | 推进与转向离散短脉冲 | 同日稍后三份 CSV 记录了对称前向 0.12/0.18/0.24/0.36、左右单侧 0.24、艏侧 0.24 与对称倒车 −0.12，每次后均有显式三零。通道绑定为 0=左、1=右、2=艏。请求推力与 T200-V16 离散点对照见专节 | 只是短脉冲离散点核对，不是全曲线或动力学精度验收；未做 `[0.12, −0.12, 0]`；`velX` 与 `posX` 的差异未解释清楚。详见 [§推进与转向闭环核验](#推进与转向闭环核验) | 已记录（本机实测；精度未评价） |
+| IMU / LiDAR 与 TF 树 | 2026-11-26 至 2026-11-27 在同一测试场景中，静止、无推力、不开 Recording、不保存场景的条件下，核对了 `/marus_boat/imu`、`/marus_boat/lidar` 与 `/tf` 的类型、发布者、消息头时间戳间隔、首帧结构与 12.01 s 静止样本；源码 / Prefab 只读解释了默认仅 3 条 `/tf` 边、缺少 `map -> marus_boat/base_link` 的原因。方案 A 临时在测试场景根实例挂 `TfStreamerGrpc`，6.02 s 内测到第 4 条边，且 `tf2_ros` 全链路 `LOOKUP_OK`；退出 Play 不保存，官方 Prefab 与测试场景 SHA256 与第 0 段一致。详见 [§IMU / LiDAR 与 TF 树核验](#imu-lidar-tf-树核验) | 仅测试场景、静止与临时挂载。不得写成 IMU / LiDAR 已标定或精度已通过，也不得把设定频率写成已测频率。方案 A 未持久写入官方 Prefab 或已保存测试场景。相机 / 声呐流、运动态联动与正式 `ros2 topic hz` 均未做。原始终端全文不作为本站公开附件 | 已记录（本机实测；精度未评价；方案 A 仅为临时验证） |
 | GPS 精度 / 频率 / 坐标 | 2026-11-25 测试场景已记录三项结论：发布频率与设定不一致（消息头间隔约 0.0400 s，对应约 25.000 Hz，设定为 100 Hz）；坐标系约定已部分核对；数值正确性按当时条件无法核验 | 不得把话题有消息、协方差、`isRTK` / 状态枚举，或与同一套 `Unity2Geo` 换算链的互相比对升级为定位已验收。墙钟接收频率未测到。详见 [§GNSS / GPS 精度、发布频率与坐标系约定](#gnss-gps-约定核验) | 已记录（本机实测；精度无法核验） |
 | 步骤记录器局部行为 | 1153 纯逻辑 196 项检查；原工程经脚本 1220 升级后编译 0 错误、61 警告且未进入 Play；隔离工程手动阶段与四次自动计划已审阅通过 | 合成记录。不是真实 `AddForce`、推进器、水动力、ROS、训练或实艇验收。活动会话直接退出 Editor 的 `OnApplicationQuit` 分支未单测。该范围说明不否定其后测试场景中的真实施力记录 | 局部已验证 |
 
@@ -384,6 +385,161 @@ yaw = atan2(fwd_x, fwd_z)
 
 ---
 
+## IMU / LiDAR 与 TF 树核验 {#imu-lidar-tf-树核验}
+
+整理日期：2026-11-26 至 2026-11-27，时区 America/Los_Angeles（PST，UTC-8）。性质：本机实测，仅测试场景。第 1、2 段与方案 A 均无推力、不开 Recording、不写新文件；方案 A 退出 Play 时不保存场景，也不对官方 Prefab 执行 Apply。原始终端全文不作为本站公开附件。本节只记录已测到的话题类型、发布关系、消息头时间戳间隔、关键字段摘要与 `/tf` 实际边集，以及源码 / Prefab 只读核对和一次临时根 TF 验证。
+
+不得据此写成 IMU 或 LiDAR 已标定、精度已通过、噪声模型已验收，或官方 Prefab / 已保存测试场景已持久挂载 `map -> marus_boat/base_link`。不得把 Inspector 或脚本里的设定频率直接写成已经测到的话题频率。阶段 1 总体仍保持进行中。
+
+### 测了什么、没测什么
+
+本轮只做了四件事：
+
+1. 第 0 段只读锁定核验：对照已锁定的六个仓库提交与指定文件 SHA256，确认测试场景仍只额外关闭 `ASVPrimitiveController`，且当时 `30052` 空闲。
+2. 第 1 段短时连通与消息结构抽查（3.52 s）：确认 `/marus_boat/imu`、`/marus_boat/lidar`、`/tf`、`/tf_static` 的类型、发布 / 订阅关系与首帧结构。
+3. 第 2 段 12.01 s 静止只读采样：统计 IMU、LiDAR 与 `/tf` 的消息头时间戳间隔、墙钟间隔，以及静止样本的字段范围；全程无推力。
+4. 方案 A 临时根 TF 验证（6.02 s）：仅在测试场景的 `marus_boat` 根实例临时挂载 `TfStreamerGrpc`，确认可以补出 `map -> marus_boat/base_link`，且 `tf2_ros` 能把该边与既有传感器边连成可查询链路；随后退出 Play 不保存，并以 SHA256 复核文件未被改写。
+
+本轮没有做：推力或运动态下的 IMU / LiDAR / TF 联动；正式 `ros2 topic hz`；相机或声呐话题与图像 / 声呐流；把根 TF 写回已保存测试场景或官方 Prefab；传感器噪声、偏置、标定或精度验收；许可证审计。
+
+### 场景与连接条件
+
+与已发布运动验收、GNSS 核验使用同一测试场景：`Assets/Scenes/ExampleScene_Stage1MotionAcceptance.unity`。该文件由官方 `ExampleScene.unity` 另存得到，只在该实例上关闭 `ASVPrimitiveController`，没有把改动 Apply 回官方 Prefab。第 0 段测得该测试场景 SHA256 为 `bf9b90fe917277b916c7772bf9ad08f1c5cd6e521a1bf7399796851676106c4a`，官方 `marus_boat.prefab` SHA256 为 `e6c360556aa27b0db5aa16b2189f02407840d0b9542a8404e833065828ae56b7`。方案 A 收尾时这两个哈希与第 0 段逐字节一致。
+
+启动方式沿用已发布操作页：先在 `$ROS2_WS` 启动 `marus2_ros_adapter`，再在 Unity 中打开上述测试场景并进入 Play。适配器为回环 `127.0.0.1:30052`。第 1、2 段与方案 A 收尾时，`ss -ltnp 'sport = :30052'` 均空闲。
+
+六个锁定提交与第 0 段核验一致，完整 SHA 如下：
+
+| 仓库 | 完整提交 SHA |
+| --- | --- |
+| example | `0f9ec3f8a4a30126bcbed8ddbf90800fafa33f06` |
+| core | `747bcee11adfa0f4bbd60db698b24794ab5581c8` |
+| sensors | `c88714d750d0b0d99dcfde77694ec5f37d407ec5` |
+| sensors-grpc | `485146512c8011a1586570d635e8f240ee43f667` |
+| proto | `807af27a08b242748232c6ef87f0d68a675d2040` |
+| adapter | `7af7a0b492bb8c55948a2c839a9f077b7cfe4173` |
+
+### 必须分开的结论类型
+
+| 结论类型 | 本轮是否成立 | 说明 |
+| --- | --- | --- |
+| 话题存在且类型已核对 | 是（本机实测） | IMU 为 `sensor_msgs/msg/Imu`，LiDAR 为 `sensor_msgs/msg/PointCloud2`（不是 `LaserScan`），`/tf` 为 `tf2_msgs/msg/TFMessage` |
+| 发布者与 QoS 已记录 | 是（本机实测） | 上述三话题均由 `marus2_ros_adapter` 发布（1 publisher，`RELIABLE` / `VOLATILE`）；`/tf_static` 为 0 publisher、1 subscriber，适配器只订阅不发布 |
+| 消息头时间戳间隔已记录 | 是（本机实测） | IMU 严格 25.000 Hz，LiDAR 严格 10.000 Hz，默认 `/tf` 约 0.988 Hz。这是消息头时间戳间隔，不是设定值本身 |
+| 墙钟到达间隔已记录 | 是（本轮 Python 采样，不是正式 `ros2 topic hz`） | IMU 墙钟 24.826 Hz，LiDAR 9.999 Hz，默认 `/tf` 0.971 Hz。不得把本轮结果回写为 GNSS 已补做正式 `ros2 topic hz` |
+| 静止样本字段范围已记录 | 是（本机实测） | 只描述该次静止窗口；不得升级为标定或精度通过 |
+| 默认 `/tf` 边集已记录 | 是（本机实测） | 仅 3 条边：`marus_boat/base_link -> gps_frame` / `imu_frame` / `lidar_frame`；`TF_HAS_MAP_TO_BASE_LINK=False`；`/tf_static` 为 0 边 |
+| 缺少 `map -> base_link` 与相机 / 声呐边的原因 | 源码 / Prefab 只读静态事实，并与实测边集相符 | 官方 Prefab 未在艇体根挂 `TfStreamerGrpc`；四个相机与 `sonar` 默认 `m_IsActive: 0`。这不是测量遗漏 |
+| 方案 A 可临时补出根 TF 且可查询 | 是（本机临时实测） | 仅测试场景实例、未保存、未 Apply。不得写成官方示例已持久验收完整 TF 树 |
+| IMU / LiDAR 精度、噪声或标定已通过 | 否 | 未设通过阈值，也未做运动态对照 |
+| 官方 Prefab 或已保存测试场景已挂根 TF | 否 | 方案 A 为临时验证；收尾 SHA256 与第 0 段一致 |
+
+### 第 0 段：只读锁定核验
+
+时间：2026-11-26 23:55:29 PST。本段不进入 Play，不启动适配器。
+
+核验结果：`ERRCOUNT=0`，`WARNCOUNT=0`；`PORT_30052 NO_LISTEN`。六个锁定提交与上表一致。脚本对照的 17 项核心文件 SHA256 全部 `HASH_OK`，13 个指定路径全部 `GIT_CLEAN`。
+
+`marus_boat.prefab`（SHA256 `e6c360556aa27b0db5aa16b2189f02407840d0b9542a8404e833065828ae56b7`）与测试场景 `ExampleScene_Stage1MotionAcceptance.unity`（SHA256 `bf9b90fe917277b916c7772bf9ad08f1c5cd6e521a1bf7399796851676106c4a`）确认：测试场景相对官方示例，仅额外关闭了该实例上的 `ASVPrimitiveController`，没有非预期的传感器或 TF 覆盖。
+
+### 第 1 段：短时连通与消息结构抽查
+
+时间：2026-11-27 02:51 PST。探针时长 3.52 s。无推力，不开 Recording，不保存场景。
+
+话题与发布关系：
+
+| 话题 | 类型 | 发布 / 订阅 | QoS（已记录） |
+| --- | --- | --- | --- |
+| `/marus_boat/imu` | `sensor_msgs/msg/Imu` | 1 publisher：`marus2_ros_adapter` | `RELIABLE` / `VOLATILE` |
+| `/marus_boat/lidar` | `sensor_msgs/msg/PointCloud2`（不是 `LaserScan`） | 1 publisher：`marus2_ros_adapter` | `RELIABLE` / `VOLATILE` |
+| `/tf` | `tf2_msgs/msg/TFMessage` | 1 publisher：`marus2_ros_adapter` | `RELIABLE` / `VOLATILE` |
+| `/tf_static` | （本段未改写类型名） | 0 publisher，1 subscriber | 适配器只订阅，不发布 |
+
+首帧结构：
+
+- IMU：`frame_id='marus_boat/imu_frame'`；三组 9 元协方差全部为 `0.0`。
+- LiDAR：`frame_id='marus_boat/lidar_frame'`；`height=1`，`width=136120`，`point_step=24`，`row_step=3266880`，`is_dense=True`。字段布局为 `XYZIRT`：`x` / `y` / `z` / `intensity` 为 `FLOAT32`；`ring` 为 `UINT16`，偏移 16，其后有 2 字节填充；`time` 为 `UINT32`，偏移 20。
+- `/tf`：仅见 3 条边，分别是 `marus_boat/base_link -> gps_frame`、`marus_boat/base_link -> imu_frame`、`marus_boat/base_link -> lidar_frame`。未见 `map -> marus_boat/base_link`。
+
+收尾：`ss -ltnp 'sport = :30052'` 空闲。
+
+说明：第 1 段首帧 LiDAR `width=136120`，第 2 段全程恒定为 `width=136116`。两者都是实测值，这里并列记录，不把其中一侧改写成另一侧，也不在此归因。
+
+### 第 2 段：12.01 s 静止只读采样
+
+时间：2026-11-27 02:57 PST。采样窗 12.01 s。无推力，不开 Recording，不写文件。
+
+**IMU**（296 帧）：
+
+- `header.stamp` 严格 **25.000 Hz**：295/295 个间隔全部为 `0.040000 s`。这与 GNSS 设定 100 Hz、实测消息头间隔约 0.0400 s（约 25.000 Hz）的现象同构。差异原因仍未拆开验证。
+- 墙钟到达间隔（本轮 Python 采样，不是正式 `ros2 topic hz`）为 24.826 Hz，中位数 `0.040493 s`。
+- 线加速度均值：`ax=-0.448709±0.000008`，`ay=+0.053124±0.000001`，`az=+9.799593±0.000103`；模长 `|a|=9.810004±0.000104 m/s²`。该次静止样本中重力沿 `+Z`。
+- 角速度接近 0：`max_abs ≤ 5e-6 rad/s`。
+- 四元数恒定 `(-0.022877, 0.002705, 0.000167, 0.999735)`，模长 `1.000000`。
+- 全部 296 帧的三组协方差均为 `0.0`。
+
+**LiDAR**（118 帧）：
+
+- `header.stamp` 严格 **10.000 Hz**：间隔全部为 `0.100000 s`。墙钟到达间隔 9.999 Hz，与设定 10 Hz 相符。
+- `width=136116`（全程恒定），`is_dense=True`。
+- 首帧与尾帧解包均为 **100.00%** 有限点，全零点个数为 `0`。
+- 测距 `r ∈ [5.256, 119.999] m`，中位数 `80.985 m`，落在设定范围 `[3, 120] m` 内。
+- `x ∈ [-119.66, 119.04]`，`y ∈ [-110.86, 118.98]`，`z ∈ [-43.61, 21.35]`，`intensity ∈ [0, 24]`。
+- 命中 99 个 ring（`29..127`）。
+- `time_u32` 在同一帧内统一，并跨帧递增：`480668694 -> 480680642`。
+
+**TF**：
+
+- 12 s 内稳定仅 3 条边；每条边 11 帧。
+- `header.stamp` 为 0.988 Hz，间隔 `1.000~1.020 s`；墙钟 0.971 Hz。
+- 变换恒定：`max_dt ≤ 1e-6 m`。
+- `/tf_static` 为 0 边。
+- `TF_HAS_MAP_TO_BASE_LINK=False`。
+
+收尾：`30052` 空闲。
+
+### 源码与 Prefab 根因核查（只读静态事实）
+
+以下只描述官方锁定副本与官方序列化中的静态事实，并与第 1、2 段测到的边集对照。不修改任何源码、场景或 Prefab。
+
+- 官方 `marus_boat.prefab` 中，四个相机 `camera_bow` / `camera_stern` / `camera_port` / `camera_starboard` 与 `sonar` 默认 `m_IsActive: 0`。这些对象上的相关组件本身为 `m_Enabled: 1`，官方场景也没有覆盖它们的 `m_IsActive`。Unity 不会对未激活对象调用 `Update`，因此运行时不会为这些传感器发布 `/tf`。这与实测只看到 gps / imu / lidar 三条边相符。
+- `TfStreamerGrpc.UpdateVehicle()`（约 L84–102）和 `UpdateTransform()`（约 L252–257）在源码中预留了如下路径：组件挂在艇体根上、未设置 `ParentTransform` 时，按 `Unity2Map` 发布 `map -> {车名}/base_link`。官方 Prefab 与官方场景均未挂载该根组件。`RosConnection.OriginFrameName="map"` 只用于 `TfHandler` 的入站原点管理；`TfHandler.UpdateTf()` 只操作 `RosConnection/TfHandler/tf` 镜像子树，不会反向覆盖艇体 Transform。因此，默认看不到 `map -> marus_boat/base_link`，是官方示例的序列化选择，不是第 1、2 段漏测。
+
+以上静态核对只解释默认边集。它本身不是一次新的运行时验收，也不能代替方案 A 的临时实测。
+
+### 方案 A：临时根 TF 验证
+
+时间：2026-11-27 07:31 PST。默认 1 Hz，探针 6.02 s。操作范围仅限测试场景实例：在 `ExampleScene_Stage1MotionAcceptance` 的 `marus_boat` 根上临时挂载 `TfStreamerGrpc`，`ParentTransform=None`，发布 `map -> marus_boat/base_link`，频率 1 Hz。退出 Play 时不保存场景，不对官方 Prefab 执行 Apply。
+
+运行时 `/tf` 实测为 4 条边（在原有 3 条传感器边之外增加根边）；每条边 6 帧；`stamp_hz=0.996`，`wall_hz=0.968~0.969`。
+
+根边 `map -> marus_boat/base_link` 该次测得：
+
+- 平移 `t=(-0.0017, -10.0218, -0.1681)`
+- 四元数 `q=(-0.0143, 0.0181, 0.7070, 0.7068)`
+- RPY `rpy=(0.31°, 2.62°, 90.03°)`
+- 前向 `+X` 指向 ENU 正北 `+Y`
+
+`tf2_ros` 全链路查询全部为 `LOOKUP_OK`：`map -> base_link`、`map -> imu_frame`、`map -> lidar_frame`、`map -> gps_frame` 均解析成功。本稿按终端回传抄录根边的平移、四元数与 RPY；子坐标系查询同样成功，但不把由根边与传感器边推算的数值写成单独测得的查询结果。
+
+收尾零改动复核：`30052` 空闲；`marus_boat.prefab` 与 `ExampleScene_Stage1MotionAcceptance.unity` 的 SHA256 与第 0 段逐字节一致。因此，方案 A 只证明官方预留路径在临时挂载时可以工作，并且 `tf2_ros` 能够把根边与既有传感器边连起来；当前保存的测试场景与官方 Prefab 均未持久挂载 `map -> marus_boat/base_link`。
+
+### 本项尚未覆盖
+
+以下内容本轮明确没有验收，也不得从已有数字外推为已通过：
+
+- 全推力曲线、水动力模型与动力学精度
+- IMU / LiDAR 噪声、偏置、标定与精度指标
+- 运动态下 IMU / LiDAR / TF 的联动
+- 相机与声呐话题、图像或声呐流
+- 把根 TF 持久写入官方 Prefab 或已保存测试场景
+- 正式 `ros2 topic hz`（本轮墙钟数字来自 Python 采样）
+- 许可证审计
+
+阶段 1 总体仍保持进行中。下一步工作包待定，本节不授权新的试验。
+
+---
+
 ## 已知现象
 
 ### 渲染相关
@@ -395,6 +551,8 @@ yaw = atan2(fwd_x, fwd_z)
 | `RNG_CS.compute` 缺少 `#pragma kernel` | 编译警告 | 记录中 |
 
 2026-11-25 测试场景在运动验收、其后 GNSS 核验，以及同日晚间推进与转向三次 Play 中均再次出现粉色地形与上述 Vulkan 警告，不作为新错误，也未自动消失。上述会话的 Console 错误计数均为 0；推进与转向三次 Play 各有 4 条既知 Vulkan 警告。这些现象不作为 GNSS 包或推进核验的失败条件。详见 [已知问题清单]({% link docs/issues/known-issues.md %})。
+
+2026-11-26 至 2026-11-27 的 IMU / LiDAR 与 TF 核验是另一次静止、无推力采样，不是对上述粉色地形或 Console 条目的复测。本轮没有把渲染或 Console 现象写成新的结论。IMU 消息头时间戳间隔再次测到严格 25.000 Hz，与 GNSS 设定 100 Hz、实测约 25.000 Hz 的现象同构；原因仍未拆开。默认 `/tf` 只有 3 条传感器边、没有 `map -> marus_boat/base_link`，已由源码 / Prefab 只读核对与方案 A 临时验证分开记录，见 [IMU / LiDAR 与 TF 树核验](#imu-lidar-tf-树核验)。
 
 {: .warning }
 现象影响待查，**未归因于显卡驱动**。
@@ -411,6 +569,8 @@ yaw = atan2(fwd_x, fwd_z)
 
 「推进与转向闭环核验（离散短脉冲）」为同日晚间的本机实测，依据已上传的三份 CSV 与当时终端、Console 回传。CSV 只以可移植路径和 SHA256 标识，原始文件不作为本站公开附件。曲线图随文档仓库提供。
 
+「IMU / LiDAR 与 TF 树核验」为 2026-11-26 至 2026-11-27 的本机实测，依据当时终端回传原数整理，不设通过阈值。原始终端全文不作为本站公开附件。本轮墙钟数字来自 Python 采样，不是正式 `ros2 topic hz`，也不能回写为 GNSS 墙钟已测到。方案 A 为未保存的临时挂载，已保存测试场景与官方 Prefab 均未持久挂载 `map -> marus_boat/base_link`。
+
 {: .note-title }
 > 内容来源
 >
@@ -420,7 +580,8 @@ yaw = atan2(fwd_x, fwd_z)
 > - **阶段 1 测试场景运动验收**: 2026-11-25 本机实测。整理时对照已上传文件复核了四份 CSV 的字节数、SHA256、行数与输入组
 > - **GNSS / GPS 精度、发布频率与坐标系约定**: 2026-11-25 同日稍后本机实测。整理时按回传终端与截图原数抄录，未改数，也未把纬度差换算成米作为结论
 > - **推进与转向闭环核验（离散短脉冲）**: 2026-11-25 同日晚间本机实测。整理时对照已上传三份 CSV 复核了字节数、SHA256、行数、指令组与离散点数值，不设通过阈值
-> - **已知现象**: 迁移自原 `results.md` §已知现象；同日补记再次出现，未改归因
+> - **IMU / LiDAR 与 TF 树核验**: 2026-11-26 至 2026-11-27 本机实测，含第 0 段只读锁定核验、第 1 段短时结构抽查、第 2 段 12.01 s 静止采样，以及方案 A 临时根 TF 验证。整理时按回传终端原数抄录，未改数，不设通过阈值。原始终端全文不作为本站公开附件
+> - **已知现象**: 迁移自原 `results.md` §已知现象；同日补记再次出现，未改归因。2026-11-27 仅交叉引用 IMU 25.000 Hz 与默认 TF 边集，不把本轮写成对粉色地形或 Console 的复测
 > - **验证边界说明**: 迁移自原 `results.md` §验证边界说明，并区分历史基线与本次实测
 > - **记录器局部验证**: 2026-11-25 已审阅证据。原始终端、Console 全文与 Editor.log 不作为公开附件。本节正文除范围提示外保持原样
 
@@ -519,4 +680,4 @@ yaw = atan2(fwd_x, fwd_z)
 | `lifecycle-disable` | `lcd20261125T121130Z-1053849` | Editor.log `4c88329a7e25eb89cdbcda9566a1146ce34a7572e4db7c3889233504914f6361`；证据 JSON `940a5a9631e6884dc30764dff216f32b09a411f0334f123d3c4a8bc87ad3de65`；两份新 CSV 的内容哈希同为 `037e3640138b35e8cfbf1ccc27e8f96d7c6808f145df1748ae3570fb393c232a`（文本相同，不是同一文件） |
 
 {: .metadata }
-**页面元数据**: 文档整理日期 2026-11-25 · 历史验证记录、公式与历史数值仍为 2026-11-24 交接基线，未改写原记录值 · 阶段 1 测试场景运动验收全文与 GNSS 三项结论保持已发布正文 · 记录器局部验证正文除范围提示外保持已审阅原文，原始日志未作为公开附件 · 同日晚间增补推进与转向离散短脉冲专节与三张曲线图 · 状态: 2026-11-25 已纳入站点，记录阶段 1 推进与转向闭环核验实测
+**页面元数据**: 文档整理日期 2026-11-27 · 历史验证记录、公式与历史数值仍为 2026-11-24 交接基线，未改写原记录值 · 阶段 1 测试场景运动验收全文、GNSS 三项结论与推进转向离散短脉冲保持已发布正文 · 记录器局部验证正文除范围提示外保持已审阅原文，原始日志未作为公开附件 · 2026-11-26 至 2026-11-27 增补 IMU / LiDAR 与 TF 树核验及方案 A 临时根 TF 验证专节 · 状态: 2026-11-27 已纳入站点，记录阶段 1 IMU / LiDAR 与 TF 树核验及方案 A 临时根 TF 验证

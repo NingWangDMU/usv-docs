@@ -2,7 +2,7 @@
 title: 环境与工程锁定
 parent: 运行与验收
 nav_order: 1
-last_modified_date: 2026-11-25
+last_modified_date: 2026-11-27
 ---
 
 # 环境与工程锁定
@@ -30,7 +30,7 @@ last_modified_date: 2026-11-25
 {: .warning }
 许可证未逐仓库、逐资产核查，**不得把全部子模块和资源统一标成同一许可证**。首次复现按工程锁定版本，不升级 Unity 或相关包。
 
-2026-11-25 GNSS 工作包第 0 段对本机做了只读核对，下列提交与已发布锁定一致。这不是新的锁定，也不是重新扫描整个工作区 HEAD：
+2026-11-25 GNSS 工作包第 0 段对本机做了只读核对，下列提交与已发布锁定一致。2026-11-26 23:55:29 PST，IMU / LiDAR / TF 工作包第 0 段再次只读核对了同一组完整提交，结果为 `ERRCOUNT=0`、`WARNCOUNT=0`，17 项核心文件全部 `HASH_OK`，13 个指定路径全部 `GIT_CLEAN`，当时 `PORT_30052 NO_LISTEN`。这不是新的锁定，也不是重新扫描整个工作区 HEAD：
 
 | 仓库 | 提交 |
 | --- | --- |
@@ -61,7 +61,7 @@ marus2-example/
         └── ThrusterController.cs         # 求值与施力路径
 ```
 
-`ExampleScene_Stage1MotionAcceptance.unity` 是 2026-11-25 由 `ExampleScene` **另存**得到的独立测试场景。原 `ExampleScene` 没有被这次验收、其后的 GNSS 核验，或同日晚间的推进与转向三次会话覆盖保存。该测试场景中仅关闭了 `marus_boat` 上的 `ASV Primitive Controller`，并且没有对 Prefab 执行 Apply。详见 [源码与状态限定]({% link docs/issues/code-status.md %}#测试场景与原场景边界)。
+`ExampleScene_Stage1MotionAcceptance.unity` 是 2026-11-25 由 `ExampleScene` **另存**得到的独立测试场景。原 `ExampleScene` 没有被这次验收、其后的 GNSS 核验、同日晚间的推进与转向三次会话，或 2026-11-26 至 2026-11-27 的 IMU / LiDAR / TF 会话（含方案 A）覆盖保存。该测试场景中仅关闭了 `marus_boat` 上的 `ASV Primitive Controller`，并且没有对 Prefab 执行 Apply。第 0 段记录测试场景 SHA256 为 `bf9b90fe917277b916c7772bf9ad08f1c5cd6e521a1bf7399796851676106c4a`，官方 `marus_boat.prefab` SHA256 为 `e6c360556aa27b0db5aa16b2189f02407840d0b9542a8404e833065828ae56b7`；方案 A 收尾时这两个哈希仍一致。详见 [源码与状态限定]({% link docs/issues/code-status.md %}#测试场景与原场景边界)。
 
 ---
 
@@ -75,7 +75,7 @@ marus2-example/
 | `$ROS2_WS` | ROS 2工作空间目录 |
 | `$BACKUP_PATH` | 本地备份目录 |
 
-步骤记录器 `UsvStepLog` 的 CSV 写在 `Application.persistentDataPath/usv-records`。2026-11-25 在本机示例工程中，该目录对应 `$HOME/.config/unity3d/LABUST/marus2-example/usv-records`。这是实测路径，不是新功能。该次 GNSS 核验没有打开 Recording，也没有把经纬高写入步骤记录 CSV。同日晚间的推进与转向三次会话在同一目录写下了三份新的步骤记录 CSV。
+步骤记录器 `UsvStepLog` 的 CSV 写在 `Application.persistentDataPath/usv-records`。2026-11-25 在本机示例工程中，该目录对应 `$HOME/.config/unity3d/LABUST/marus2-example/usv-records`。这是实测路径，不是新功能。该次 GNSS 核验没有打开 Recording，也没有把经纬高写入步骤记录 CSV。同日晚间的推进与转向三次会话在同一目录写下了三份新的步骤记录 CSV。2026-11-26 至 2026-11-27 的 IMU / LiDAR / TF 核验与方案 A 同样没有打开 Recording，也没有写新的步骤记录 CSV。
 
 `$HOME/usv-projects/logs` **不是**上述 CSV 目录。该路径在本机只见过适配器日志（如 `adapter.log`）。隔离工程的记录目录与此不同，见 [已有验证结果 §记录器局部验证]({% link docs/operations/verification.md %}#记录器局部验证) 中的 `$RECORDS_DIR`。
 
@@ -83,4 +83,4 @@ marus2-example/
 实际部署时请将占位符替换为您的实际路径。不要把个人主目录的绝对路径写进页面正文。
 
 {: .metadata }
-**页面元数据**: 文档整理日期 2026-11-25 · 锁定版本表仍为 2026-11-24 交接记录，本次未重新扫描工作区 HEAD · 测试场景与 CSV 目录为 2026-11-25 本机实测补记 · 子模块提交为同日 GNSS 第 0 段只读复核 · 同日晚间补记推进会话仍使用同一测试场景与记录目录 · 状态: 2026-11-25 已纳入站点，记录阶段 1 推进与转向闭环核验实测
+**页面元数据**: 文档整理日期 2026-11-27 · 锁定版本表仍为 2026-11-24 交接记录，本次未重新扫描工作区 HEAD · 测试场景与 CSV 目录为 2026-11-25 本机实测补记 · 子模块提交已经 GNSS 第 0 段与 2026-11-26 IMU 第 0 段只读复核 · 推进会话以及其后 IMU / LiDAR / TF 会话仍使用同一测试场景；后者未写新的步骤记录 CSV · 状态: 2026-11-27 已纳入站点，记录阶段 1 IMU / LiDAR 与 TF 树核验及方案 A 临时根 TF 验证
