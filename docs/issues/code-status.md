@@ -2,7 +2,7 @@
 title: 源码与状态限定
 parent: 问题与记录
 nav_order: 2
-last_modified_date: 2026-11-25
+last_modified_date: 2026-11-27
 ---
 
 # 源码与状态限定
@@ -51,12 +51,14 @@ last_modified_date: 2026-11-25
 
 同日稍后的 GNSS / GPS 核验复用了同一测试场景：进入 Play 前确认 `ASV Primitive Controller` 仍关闭；会话中不发推力、不对 Prefab 执行 Apply；退出 Play 时不保存场景。因此这次 GNSS 记录同样不能读成主示例场景或 Prefab 已被改写。同日晚间的推进与转向三次会话也复用该测试场景：发送了离散短脉冲与显式三零，但同样未覆盖保存原 `ExampleScene`，未对 Prefab 执行 Apply，也没有按 WASD。
 
-运动记录、CSV 与显式归零证据见 [已有验证结果 §阶段 1 测试场景运动验收]({% link docs/operations/verification.md %}#阶段-1-测试场景运动验收)。同日晚间的推进与转向离散短脉冲见 [已有验证结果 §推进与转向闭环核验]({% link docs/operations/verification.md %}#推进与转向闭环核验)。GNSS 三项结论见 [已有验证结果 §GNSS / GPS 精度、发布频率与坐标系约定]({% link docs/operations/verification.md %}#gnss-gps-约定核验)。
+2026-11-26 至 2026-11-27 的 IMU / LiDAR 与 TF 树核验再次复用同一测试场景：第 0 段只读锁定核验确认测试场景仍只额外关闭 `ASV Primitive Controller`，官方 `marus_boat.prefab` SHA256 为 `e6c360556aa27b0db5aa16b2189f02407840d0b9542a8404e833065828ae56b7`，测试场景 SHA256 为 `bf9b90fe917277b916c7772bf9ad08f1c5cd6e521a1bf7399796851676106c4a`。第 1、2 段无推力、不开 Recording、不保存场景、不对 Prefab 执行 Apply。方案 A 仅在该测试场景的 `marus_boat` 根实例上临时挂载 `TfStreamerGrpc`，退出 Play 时不保存，也不对 Prefab 执行 Apply；收尾时上述两个 SHA256 与第 0 段逐字节一致。因此方案 A 不能读成已保存测试场景或官方 Prefab 已被改写。
+
+运动记录、CSV 与显式归零证据见 [已有验证结果 §阶段 1 测试场景运动验收]({% link docs/operations/verification.md %}#阶段-1-测试场景运动验收)。同日晚间的推进与转向离散短脉冲见 [已有验证结果 §推进与转向闭环核验]({% link docs/operations/verification.md %}#推进与转向闭环核验)。GNSS 三项结论见 [已有验证结果 §GNSS / GPS 精度、发布频率与坐标系约定]({% link docs/operations/verification.md %}#gnss-gps-约定核验)。IMU / LiDAR 与 TF 树核验及方案 A 收尾哈希见 [已有验证结果 §IMU / LiDAR 与 TF 树核验]({% link docs/operations/verification.md %}#imu-lidar-tf-树核验)。
 
 {: .note-title }
 > 内容来源
 >
-> 迁移自原 `known-issues.md` §源码与工作区状态限定说明。记录器升级与隔离边界为 2026-11-25 增补。测试场景与原场景边界为同日运动验收补记，并补记同日 GNSS 与推进会话均未保存、未 Apply Prefab
+> 迁移自原 `known-issues.md` §源码与工作区状态限定说明。记录器升级与隔离边界为 2026-11-25 增补。测试场景与原场景边界为同日运动验收补记，并补记同日 GNSS 与推进会话均未保存、未 Apply Prefab。2026-11-26 至 2026-11-27 再补记 IMU / LiDAR / TF 会话与方案 A 均未保存、未 Apply，且收尾 SHA256 与第 0 段一致
 
 {: .metadata }
-**页面元数据**: 文档整理日期 2026-11-25 · 历史三文件限定仍为交接记录，本次未重新 diff 工作区 · 记录器 1220 升级与隔离边界已按已审阅证据写入 · 测试场景另存与 Prefab 未 Apply 为 2026-11-25 本机实测边界，并补记同日推进会话 · 状态: 2026-11-25 已纳入站点，记录阶段 1 推进与转向闭环核验实测
+**页面元数据**: 文档整理日期 2026-11-27 · 历史三文件限定仍为交接记录，本次未重新 diff 工作区 · 记录器 1220 升级与隔离边界已按已审阅证据写入 · 测试场景另存与 Prefab 未 Apply 为 2026-11-25 本机实测边界，并补记同日推进会话以及 2026-11-26 至 2026-11-27 的 IMU / LiDAR / TF 会话与方案 A · 状态: 2026-11-27 已纳入站点，记录阶段 1 IMU / LiDAR 与 TF 树核验及方案 A 临时根 TF 验证
